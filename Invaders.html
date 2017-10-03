@@ -1,0 +1,122 @@
+<!doctype html>
+<html>
+ <head>
+ <title>Space Invaders</title>
+ <link rel="stylesheet" href="styles.css">
+ <script src="drawing.js"></script>
+ <script src="controller.js"></script>
+ </head>
+ <body>
+ <h1>Space Invaders</h1>
+ <canvas id="invaders" width="900" height="800"></canvas>
+ <script>
+//CANVAS DECLARATION
+ var canvas = document.getElementById("invaders");
+ var context = canvas.getContext("2d");
+ context.strokeStyle = "#00FF00";
+ context.fillStyle = "#009900";
+ draw_grid(context);
+
+//OBJECTS
+var GameController = new Controller();
+//Sounds used in the game
+var player_shoot = new Audio();
+player_shoot.src = "sounds/shoot.wav";
+var enemy_shoot = new Audio();
+enemy_shoot.src = "sounds/invadershoot.wav";
+var explosion_noise = new Audio();
+explosion_noise.src = "sounds/explosion.wav";
+
+//Starting the game controller
+GameController.start();
+GameController.draw(context);
+
+//CONTROLS
+window.onkeydown = function(e) {
+ var key = e.keyCode;
+ switch(key) {
+ case 37: // left arrow
+ GameController.defenders.forEach(function(Defender){
+   Defender.move_left();
+ });
+ break;
+ case 39: // right arrow
+ GameController.defenders.forEach(function(Defender){
+   Defender.move_right();
+ });
+ break;
+ case 32:
+ GameController.defenders.forEach(function(Defender){
+   Defender.shoot();
+ });
+ if (GameController.isGameOver){
+   GameController.start();
+   GameController.isGameOver = 0;
+ }
+ break;
+ }
+}
+
+window.onkeyup = function(e) {
+ var key = e.keyCode;
+ switch(key) {
+ case 37: // left arrow
+ GameController.defenders.forEach(function(Defender){
+   Defender.move_stop();
+ });
+ break;
+ case 39: // right arrow
+ GameController.defenders.forEach(function(Defender){
+   Defender.move_stop();
+ });
+ break;
+ }
+}
+
+//DRAWING
+function draw() {
+ context.clearRect(0, 0, canvas.width, canvas.height);
+ context.strokeStyle = "#00FF00";
+ draw_canvas(context);
+ context.fillStyle = "#FFFFFF";
+ context.fillStyle = "00FF00";
+ context.font="30px Arial";
+ context.fillText(
+   "SCORE: " + GameController.score, canvas.width - 225, canvas.height - 15);
+ this.strokeStyle = "#FFFFFF";
+ this.fillStyle = "#000000";
+ this.lineWidth = 3;
+ GameController.draw(context);
+ GameController.bunkers.forEach(function(Shield){
+ Shield.draw(context);
+ });
+}
+
+//UPDATING
+var previous;
+function frame(timestamp) {
+ if (!previous) previous = timestamp;
+ var elapsed = timestamp - previous;
+ update(elapsed/1000);
+ fps = 1000 / elapsed;
+ draw();
+ previous = timestamp;
+ window.requestAnimationFrame(frame);
+ GameController.time = GameController.time + elapsed;
+ if (GameController.time > 1000) {
+   GameController.updateinvader();
+   GameController.time = 0;
+ }
+}
+function update(elapsed) {
+  GameController.defenders.forEach(function(Defender){
+    if (Defender.x > 800)
+    Defender.x -= 5;
+    if (Defender.x < 20)
+    Defender.x += 5;
+  });
+  GameController.update(context,elapsed);
+}
+window.requestAnimationFrame(frame);
+ </script>
+ </body
